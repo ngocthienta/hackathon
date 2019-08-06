@@ -32,17 +32,25 @@ def create_triplets(n):
 
 def triplets_to_eng_numerals(n):
     hundreds_digit = ord(n[0]) - 48
+
     tens_digit = ord(n[1]) - 48
+
     ones_digit = ord(n[2]) - 48
+
     numerals = ''
-    if hundreds_digit != 0:
-        numerals += '{} hundred '.format(ones[hundreds_digit])
+    if hundreds_digit > 0:
+        numerals += '{} hundred'.format(ones[hundreds_digit])
         if tens_digit or ones_digit:
-            numerals += 'and '
+            numerals += ' and '
     else:
         pass
-    if tens_digit >= 1:
-        numerals += '{}-{}'.format(tens[tens_digit], ones[ones_digit])
+
+    if tens_digit > 1:
+        if ones_digit > 0:
+            numerals += '{}-{}'.format(tens[tens_digit], ones[ones_digit])
+        else:
+            numerals += tens[tens_digit]
+
     elif tens_digit == 1:
         numerals += after_ten[ones_digit]
     else:
@@ -52,7 +60,10 @@ def triplets_to_eng_numerals(n):
 
 def integer_to_english_numeral(n, activate_tts=False):
     check_exceptions(n, activate_tts)
+    if n == 0:
+        return "zero"
     triplets_list = create_triplets(n)
+    print(triplets_list)
     numerals_list = [triplets_to_eng_numerals(i) for i in triplets_list]
     print(numerals_list)
     result = ''
@@ -61,8 +72,8 @@ def integer_to_english_numeral(n, activate_tts=False):
             pass
         else:
             result = '{} {} {}'.format(numerals_list[i], suffixes[i], result)
-
+    result = '({})'.format(result)
     return result
 
 
-print(integer_to_english_numeral(901902000000))
+print(integer_to_english_numeral(131001))
