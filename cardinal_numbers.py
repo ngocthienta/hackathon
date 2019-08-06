@@ -71,7 +71,7 @@ def integer_to_vietnamese_numeral(n, region='north', activate_tts=False):
         for i in range(0, 3):
             digit_list.append(n % 10)
             n //= 10
-        # Change value according to the correct way of pronunciation
+        # Change value to rectify the way of pronunciation
         if digit_list[0] == 1 and not digit_list[1] in [0, 1]:
             digit_list[0] = -1
         if digit_list[0] == 5 and digit_list[1] != 0:
