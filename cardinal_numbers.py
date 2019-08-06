@@ -1,10 +1,10 @@
 import pygame
 
 pygame.init()
-vn_sound_dict = dict(không='khong.ogg', một='mot1.ogg', mốt='mot2.ogg', hai='hai.ogg', ba='ba.ogg', bốn='bon.ogg',
-                  năm='nam.ogg', lăm='lam.ogg', sáu='sau.ogg', bảy='bay.ogg', tám='tam.ogg', chín='chin.ogg',
-                  mươi='muoi2.ogg', mười='muoi1.ogg', nghìn='nghin.ogg', triệu='trieu.ogg', trăm='tram.ogg',
-                  linh='linh.ogg', lẻ='le.ogg', tỷ='ty.ogg')
+vn_sound_dict = dict(không='khong', một='mot1', mốt='mot2', hai='hai', ba='ba', bốn='bon',
+                  năm='nam', lăm='lam', sáu='sau', bảy='bay', tám='tam', chín='chin',
+                  mươi='muoi2', mười='muoi1', nghìn='nghin', triệu='trieu', trăm='tram',
+                  linh='linh', lẻ='le', tỷ='ty')
 vn_digits_in_units = {0: 'không', 1: 'một', -1: 'mốt', 2: 'hai', 3: 'ba', 4: 'bốn', 5: 'năm',
                   -5: 'lăm', 6: 'sáu', 7: 'bảy', 8: 'tám', 9: 'chín'}
 vn_powers_of_1k = {0: '', 1: ' nghìn', 2: ' triệu', 3: ' tỷ'}
@@ -19,15 +19,15 @@ eng_nums_patch = {'ten-one': 'eleven', 'ten-two': 'twelve', 'ten-three': 'thirte
 
 
 # Check validity of input:
-def raise_exceptions(n,activate_tts):
+def check_exceptions(n,activate_tts):
     if not isinstance(n, int):
         raise TypeError('Not a integer')
     if not n >= 0:
         raise ValueError('Not a positive integer')
     if n > 999999999999:
-        raise OverflowError('Maximum value exceeded')
+        raise OverflowError('Integer greater than 999,999,999,999')
     if activate_tts != None and not isinstance(activate_tts, bool):
-        raise TypeError('Not a boolean')
+        raise TypeError('Argument "activate_tts" is not a boolean')
 
 
 # Split the number into lists of numbers less than 1k
@@ -54,13 +54,12 @@ southside = lambda u: u.replace('linh', 'lẻ').replace('nghìn', 'ngàn')
 
 
 def integer_to_vietnamese_numeral(n, region='north', activate_tts=False):
-    raise_exceptions(n,activate_tts)
+    check_exceptions(n,activate_tts)
     if not isinstance(region, type(None)):
         if not isinstance(region, str):
-            raise TypeError('Invalid region input type')
+            raise TypeError('Argument "region" is not a string')
         elif not region in ('south', 'north'):
-            raise ValueError('Invalid region')
-
+            raise ValueError('Argument "region" does not have a correct value')
     if n == 0:
         return "không"
 
@@ -72,7 +71,7 @@ def integer_to_vietnamese_numeral(n, region='north', activate_tts=False):
         for i in range(0, 3):
             digit_list.append(n % 10)
             n //= 10
-        # Change to fit the
+        # Change value according to the correct way of pronunciation
         if digit_list[0] == 1 and not digit_list[1] in [0, 1]:
             digit_list[0] = -1
         if digit_list[0] == 5 and digit_list[1] != 0:
@@ -81,7 +80,7 @@ def integer_to_vietnamese_numeral(n, region='north', activate_tts=False):
         output = '{} trăm {} mươi {}'.format(nume_list[-1], nume_list[-2], nume_list[-3])
         return fix_abnormal_combs(output)
 
-    # Format each element in the lists
+    # Convert numbers to numerals
     nums_less_than_1k = num_splitting(n)
     vn_numerals_list = [vn_process_nums_less_than_1k(i) for i in nums_less_than_1k]
     vn_numerals_list[-1] = vn_further_repl(vn_numerals_list[-1])
@@ -89,16 +88,16 @@ def integer_to_vietnamese_numeral(n, region='north', activate_tts=False):
         if vn_numerals_list[i]:
             vn_numerals_list[i] += vn_powers_of_1k[i]
     vn_numerals_list.reverse()
-    # Join the list into a string
+    # Join the numerals together
     raw_result = ' '.join(vn_numerals_list).split()
     result = ' '.join(raw_result).strip()
     # Regional conversion
     if region == 'south':
         result = southside(result)
-    # Play sound (if necessary)
+    # Play sound
     if activate_tts:
         for i in raw_result:
-            sound = pygame.mixer.Sound('./vie/{}/{}'.format(region, vn_sound_dict[i]))
+            sound = pygame.mixer.Sound('./vie/{}/{}.ogg'.format(region, vn_sound_dict[i]))
             sound.play()
             pygame.time.delay(500)
             pygame.mixer.stop()
@@ -106,9 +105,9 @@ def integer_to_vietnamese_numeral(n, region='north', activate_tts=False):
 
 
 def integer_to_english_numeral(n,activate_tts = False):
-    raise_exceptions(n,activate_tts)
+    check_exceptions(n,activate_tts)
     if n == 0:
-        return "Zero"
+        return "zero"
 
     def eng_process_nums_less_than_1k(n):
         digit_list = []
@@ -139,24 +138,26 @@ def integer_to_english_numeral(n,activate_tts = False):
         return output.strip()
 
     nums_less_than_1k = num_splitting(n)
+    # Convert numbers to numerals
     eng_numerals_list = [eng_process_nums_less_than_1k(i) for i in nums_less_than_1k]
     for i in range(len(eng_numerals_list)):
         if eng_numerals_list[i]:
             eng_numerals_list[i] += eng_powers_of_1k[i]
     eng_numerals_list.reverse()
-    if eng_numerals_list[-1]:
+    # Add 'and'
+    if eng_numerals_list[-1] and len(eng_numerals_list) != 1:
         eng_numerals_list[-1] = 'and {}'.format(eng_numerals_list[-1])
+    # Add commas
     result = ' '.join(eng_numerals_list)
     if 'thousand' in result:
         result = result.replace('billion', 'billion,').replace('million','million,')
+    # Join the numerals together
     result = ' '.join(result.split()).strip()
+    # Play sound
     if activate_tts == True:
-        value_for_tts = result.replace('-',' ').split()
+        value_for_tts = result.replace('-',' ').replace(',','').split()
         for i in value_for_tts:
-            sound = pygame.mixer.Sound('./eng/{}.ogg'.format(i))
-            sound.play()
-            pygame.time.delay(500)
-            pygame.mixer.stop()
+            pygame.mixer.music.load('./eng/{}.mp3'.format(i))
+            pygame.mixer.music.play(0)
+            pygame.time.delay(800)
     return result
-
-print(integer_to_english_numeral(201000210125))
