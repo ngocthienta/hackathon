@@ -1,6 +1,5 @@
-import pygame
 import mutagen
-
+import pygame
 
 vn_suffixes = ['', 'nghìn', 'triệu', 'tỷ']
 vn_tens = ['linh', 'mười', 'hai mươi', 'ba mươi', 'bốn mươi', 'năm mươi', 'sáu mươi',
@@ -8,9 +7,8 @@ vn_tens = ['linh', 'mười', 'hai mươi', 'ba mươi', 'bốn mươi', 'năm m
 vn_ones = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín']
 sound_dict = {'không': 'khong', 'một': 'mot1', 'mốt': 'mot2', 'hai': 'hai', 'ba': 'ba',
               'bốn': 'bon', 'năm': 'nam', 'lăm': 'lam', 'sáu': 'sau', 'bảy': 'bay',
-              'tám': 'tam', 'chín': 'chin', 'mươi': 'muoi2', 'mười': 'muoi1',
-              'nghìn': 'nghin', 'triệu': 'trieu', 'trăm': 'tram', 'linh': 'linh',
-              'lẻ': 'le', 'tỷ': 'ty'}
+              'tám': 'tam', 'chín': 'chin', 'mươi': 'muoi2', 'mười': 'muoi1', 'nghìn': 'nghin',
+              'ngàn': 'ngan', 'triệu': 'trieu', 'trăm': 'tram', 'linh': 'linh', 'lẻ': 'le', 'tỷ': 'ty'}
 eng_suffixes = ['', 'thousand', 'million', 'billion']
 after_ten = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen',
              'sixteen', 'seventeen', 'eighteen', 'nineteen']
@@ -45,7 +43,7 @@ def create_triplets(n):
 
 
 def triplet_to_vn_numeral(n):
-    """Converts a triplet to VN numeral."""
+    """Convert a triplet to VN numeral."""
     if n == '000':
         return ''
     hundreds_digit = ord(n[0]) - 48
@@ -65,19 +63,26 @@ def triplet_to_vn_numeral(n):
     return numeral.strip()
 
 
-def text_to_speech(files_list, location, typ):
+def text_to_speech(files_list, location):
     """Play sound files."""
     for i in files_list:
-        address = './{}/{}.{}'.format(location, i, typ)
+        address = './{}/{}.ogg'.format(location, i)
         audio_info = mutagen.File(address).info
         pygame.mixer.init(frequency=audio_info.sample_rate)
         pygame.mixer.music.load(address)
         pygame.mixer.music.play(0)
-        pygame.time.delay(700)
+        pygame.time.delay(550)
         print(address)
 
 
-def integer_to_vietnamese_numeral(n, region='north', activate_tts=False):
+def integer_to_vietnamese_numeral(n, side='north', activate_tts=False):
+    """
+
+    :param n:
+    :param side: 
+    :param activate_tts: a boolean
+    :return:
+    """
     check_exceptions(n, activate_tts)
     result = ''
     if n == 0:
@@ -92,14 +97,13 @@ def integer_to_vietnamese_numeral(n, region='north', activate_tts=False):
     for i in range(0, 4):
         if numerals_list[i]:
             result = '{} {} {}'.format(numerals_list[i], vn_suffixes[i], result)
-    if region == 'south':
+    if side == 'south':
         result = result.replace('nghìn', 'ngàn').replace('linh', 'lẻ')
     if activate_tts:
         words_list = result.split()
         files_list = [sound_dict[i] for i in words_list]
-        location = 'vie/{}'.format(region)
-        typ = 'ogg'
-        text_to_speech(files_list, location, typ)
+        location = 'vie/{}'.format(side)
+        text_to_speech(files_list, location)
     return result.strip()
 
 
@@ -128,6 +132,12 @@ def triplets_to_eng_numerals(n):
 
 
 def integer_to_english_numeral(n, activate_tts=False):
+    """
+    
+    :param n:
+    :param activate_tts:
+    :return:
+    """
     check_exceptions(n, activate_tts)
     if n == 0:
         return "zero"
@@ -155,6 +165,7 @@ def integer_to_english_numeral(n, activate_tts=False):
     if activate_tts:
         files_list = result.replace('-', ' ').replace(',', '').split()
         location = 'eng'
-        typ = 'mp3'
-        text_to_speech(files_list, location, typ)
+        text_to_speech(files_list, location)
     return result.strip()
+
+print(integer_to_english_numeral(109999991203,True))
