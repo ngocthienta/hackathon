@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e172a3e30534a9a0b74742497b40f2ab196a0890d1cb082eb481fb89e384456e"
+            "sha256": "2568d3d7fa3f6a542e42d9e18942163e85feb22f34e9f28c8f85f9cee4d58783"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,6 +16,14 @@
         ]
     },
     "default": {
+        "mutagen": {
+            "hashes": [
+                "sha256:1ad1b4768ab3e80686e621fa8c16cfbb13320351a8defeddc8f76e6620a0e5a2",
+                "sha256:bb61e2456f59a9a4a259fbc08def6d01ba45a42da8eeaa97d00633b0ec5de71c"
+            ],
+            "index": "pypi",
+            "version": "==1.42.0"
+        },
         "pygame": {
             "hashes": [
                 "sha256:0480fe82cd41a43e3eea497fa2c059c72ac54cb5d003d5aa2ed06a04541c384e",
